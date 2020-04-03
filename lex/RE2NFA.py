@@ -37,7 +37,7 @@ s1:a+b*,a   s2:a+b*,a   s2:a+b*,a,b  s2:a+b*,a|b            s2:a+b*,(a|b)*
 
 '''
 
-priority = {'?':2,'*': 2, '(': -1, ')': -1, '`': 1, '|': 0}
+priority = {'?': 2, '*': 2, '(': -1, ')': -1, '`': 1, '|': 0}
 
 
 def getlevel(c):  # 优先级
@@ -45,7 +45,7 @@ def getlevel(c):  # 优先级
 
 
 def isop(c):
-    return c in {'*', '(', ')', '`','|','?'}
+    return c in {'*', '(', ')', '`', '|', '?'}
 
 
 class treenode():
@@ -69,12 +69,12 @@ class tree():
 
     def getTree(self):
         l, i = len(self.regex), -1
-        while i<l-1:
-            i+=1
+        while i < l - 1:
+            i += 1
             c = self.regex[i]
             # print(self.s1,self.s2,c)
             if c == '\\':
-                i+=1
+                i += 1
                 self.escape_char(self.regex[i])
                 continue
             if isop(c):
@@ -110,10 +110,12 @@ class tree():
             newnode.left = n1
             newnode.right = n2
         self.s2.append(newnode)
-    def escape_char(self,c):  # 处理转义字符
+
+    def escape_char(self, c):  # 处理转义字符
         self.s2.append(treenode(c))
 
-#_todo: 操,集合[],能不能实现了啊,操,你们这些狗,怎么跟狗一样
+
+# _todo: 操,集合[],能不能实现了啊,操,你们这些狗,怎么跟狗一样
 def proprocess(exp):
     #  或许会把表达式扩展,以支持更强大灵活的语法
     #  何时该加+?两个表达式的中间.两个表达式的中间,
@@ -127,28 +129,29 @@ def proprocess(exp):
             if c == '\\':
                 continue
         exp = newexp
-    #kuohao(exp)
+
+    # kuohao(exp)
     newexp = ""
     lastchar = None
     l, i = len(exp), -1
-    while i<l-1:
-        i+=1
+    while i < l - 1:
+        i += 1
         c = exp[i]
         if lastchar == '\\':
-            lastchar = '\\'+c
+            lastchar = '\\' + c
             newexp += c
             continue
-        if c=='\\':  #  转义符号,先忽略
+        if c == '\\':  # 转义符号,先忽略
             if lastchar is None:
                 newexp += c
-            else :
+            else:
                 newexp += '`'
                 newexp += c
             continue
         if lastchar is None:
             newexp += c
         elif not isop(lastchar):
-            if c == '(' or  not isop(c):
+            if c == '(' or not isop(c):
                 newexp += '`'
             newexp += c
         else:
@@ -156,35 +159,44 @@ def proprocess(exp):
                 if c == '(':
                     newexp += '`'
                 newexp += c
-            else :
+            else:
                 if lastchar == '*' or lastchar == '?':
                     newexp += '`'
                 newexp += c
         lastchar = c
     return newexp
+
+
 '''
 下面是AST-->NFA的过程
 '''
+
+
 class nfaNode():
     def __init__(self, isend=False):  # 节点最多只有两条出边,且入边,要么一条或多条空边,要么一条非空边
         self.epsilon = set()  # ε边
-        self.char = {}    # 非空边
+        self.char = {}  # 非空边
         self.state = nfa.cnt  # 状态编号
         nfa.cnt += 1
         self.isend = isend
         nfa.pool.append(self)
+
+
 class nfa():
     cnt = 0
     pool = []  # 状态池
-    def __init__(self, startstate:nfaNode=None, endstate:nfaNode=None):
+
+    def __init__(self, startstate: nfaNode = None, endstate: nfaNode = None):
         self.startstate = startstate
         self.endstate = endstate
-    def transit_table(self):  #  输出转换表
-        print("开始状态:",self.startstate.state,"接收状态:",self.endstate.state)
-        for node in nfa.pool:
-            print("状态:",node.state,"空转移:",node.epsilon,"非空转移:",node.char)
 
-def constructNFA(tree:treenode):
+    def transit_table(self):  # 输出转换表
+        print("开始状态:", self.startstate.state, "接收状态:", self.endstate.state)
+        for node in nfa.pool:
+            print("状态:", node.state, "空转移:", node.epsilon, "非空转移:", node.char)
+
+
+def constructNFA(tree: treenode):
     c = tree.val
     start = nfaNode()
     end = nfaNode(isend=True)
@@ -197,7 +209,7 @@ def constructNFA(tree:treenode):
         start.epsilon.add(end.state)
         start.epsilon.add(subnfa.startstate.state)
         subnfa.endstate.epsilon.add(end.state)
-    elif c == '?':  #  直接加一条ε边
+    elif c == '?':  # 直接加一条ε边
         subnfa = constructNFA(tree.left)
         subnfa.endstate.isend = False
         subnfa.endstate.epsilon.add(end.state)
@@ -221,12 +233,14 @@ def constructNFA(tree:treenode):
         subnfa1.endstate.epsilon.add(end.state)
     return nfa(start, end)
 
-def getnfa(re:str):
+
+def getnfa(re: str):
     t = tree(re)
     _t = t.getTree()
     ret = constructNFA(_t)
-    #ret.endstate = [ret.endstate.state]
+    # ret.endstate = [ret.endstate.state]
     return ret
+
 
 def main():
     def houxu(t):
@@ -235,15 +249,16 @@ def main():
         houxu(t.right)
         houxu(t.left)
         print(t.val, end="")
-    re = '\('
+    re = '\\('
     tre = tree(re)
-    #print(tre.regex)
+    # print(tre.regex)
     t = tre.getTree()
     print("begin"), houxu(t), print('')
     mynfa = getnfa(re)
-    #my = constructNFA(t)
+    # my = constructNFA(t)
     mynfa.transit_table()
     print(mynfa.endstate.state)
+
 
 if __name__ == "__main__":
     main()

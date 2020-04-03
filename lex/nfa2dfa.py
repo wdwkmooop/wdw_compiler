@@ -41,7 +41,6 @@ class DFA():
         self.trans = {}  # 双重字典,state,char->state 的映射
         self.startstate = None
         self.endstates = {}
-        self.curState = None # 当前状态
     #  对于一个元素的元组,可要记着写成(1,)这样的形式
     def _epsilon_closure(self, T: tuple):  # 求出集合T的epsilon闭包,包含了单个状态s的epsilon闭包
         ret = set(T)
@@ -134,19 +133,18 @@ class DFA():
             last = newlast
 
     def match(self, word:str):
-        # 让dfa只是跑而已?
-        print(len(word))
+        # 让输入串在dfa上跑,失配时,返回上一个接收状态和失配位置
         l, i= len(word), 0
-        self.curState = self.startstate
+        curState = self.startstate
         while i<l:
             c = word[i]
-            if c in self.trans[self.curState]:
-                self.curState = self.trans[self.curState][c]
+            if c in self.trans[curState]:
+                curState = self.trans[curState][c]
             else:
-                return i, self.endstates[self.curState]
+                return i, self.endstates[curState]
 
             i += 1
-
+        return i, self.endstates[curState]
 
 
     def transit_table(self):

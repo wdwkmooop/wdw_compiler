@@ -36,8 +36,8 @@ operater = ['==', '!=', '<=', '>=', '<', '>', '\\|\\|', '&&',
 identifier = '(_|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|' \
              'A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)' \
              '(0|1|2|3|4|5|6|7|8|9|' \
-             '_a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|' \
-             'A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)'
+             '_|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|' \
+             'A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z)*'
 integer = '(0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*'
 real = '(0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*.(0|1|2|3|4|5|6|7|8|9)*(e|E)?' \
        '(0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*'
@@ -88,7 +88,6 @@ class lexer():
             if line[i] in [' ','\t','\n']:
                 i+=1
                 continue
-
             if line[i] == '/':
                 s = ''
                 i += 1
@@ -97,6 +96,7 @@ class lexer():
                     i += 1
                 i += 1
                 print('<注释,_>')
+                continue
             elif line[i] == '"':
                 s = ''
                 i += 1
@@ -105,21 +105,20 @@ class lexer():
                     i += 1
                 i += 1
                 print('<字符串常量,%s>' % s)
+                continue
             else:
-                print(line)
-                pos, _type = self.dfa.match(line)
-                word = line[:pos]
-                line = line[pos:]
-                l = len(line)
-                i=0
+                #print(line[i:])
+                pos, _type = self.dfa.match(line[i:])
+                word = line[i:pos+i]
+                i += pos
                 print(token(_type,word))
                 continue
-            i += 1
 
 
+a = 0x12
 def main():
     lex = lexer('code.c')
-    lex.dfa.transit_table()
+    #lex.dfa.transit_table()
     lex.tokenize()
 
 if __name__ == '__main__':
