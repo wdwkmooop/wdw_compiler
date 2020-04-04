@@ -44,13 +44,13 @@ real = '(0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*.(0|1|2|3|4|5|6|7|8|9)*(e|E)?
 _hex = '0(x|X)(0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*'
 
 regexs = []
-regexs += [(x,0) for x in key_word]
-regexs += [(identifier,1)]
-regexs += [(x,2) for x in _board]
-regexs += [(x,3) for x in operater]
-regexs += [(integer,4)]
-regexs += [(real,5)]
-regexs += [(_hex,6)]
+regexs += [(x, 0) for x in key_word]
+regexs += [(identifier, 1)]
+regexs += [(x, 2) for x in _board]
+regexs += [(x, 3) for x in operater]
+regexs += [(integer, 4)]
+regexs += [(real, 5)]
+regexs += [(_hex, 6)]
 for x in regexs:
     print(x)
 
@@ -74,7 +74,7 @@ class lexer():
 
     def tokenize(self):
         f = open(self.filepath)
-        self.row = -1
+        self.row = 0  # 目前扫描到的行号
         while True:
             line = f.readline()
             if line == '': break
@@ -85,8 +85,8 @@ class lexer():
     def _tokenize_line(self, line: str):
         l, i = len(line), 0
         while i < l:
-            if line[i] in [' ','\t','\n']:
-                i+=1
+            if line[i] in [' ', '\t', '\n']:
+                i += 1
                 continue
             if line[i] == '/':
                 s = ''
@@ -100,27 +100,34 @@ class lexer():
             elif line[i] == '"':
                 s = ''
                 i += 1
-                while line[i] != '"':
+                while line[i] != '"':  # 我突然感觉处理转义字符可以写个公共方法了,艹
+                    if line[i] == '\\':
+                        s += line[i]
+                        s += line[i+1]
+                        i += 2
+                        continue
                     s += line[i]
                     i += 1
                 i += 1
                 print('<字符串常量,%s>' % s)
                 continue
             else:
-                #print(line[i:])
-                pos, _type = self.dfa.match(line[i:])
-                word = line[i:pos+i]
-                i += pos
-                print(token(_type,word))
-                continue
+                # print(line[i:])
+                try:
+                    pos, _type = self.dfa.match(line[i:])
+                    word = line[i:pos + i]
+                    i += pos
+                    print(token(_type, word))
+                    continue
+                except nfa2dfa.lexerror as e:
+                    print('line %d, column %d: ' %(self.row,i),e )
+                    i += e.i
 
-
-a = 0x12
 def main():
     lex = lexer('code.c')
-    #lex.dfa.transit_table()
+    # lex.dfa.transit_table()
     lex.tokenize()
+
 
 if __name__ == '__main__':
     main()
-

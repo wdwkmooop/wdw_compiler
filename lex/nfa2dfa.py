@@ -30,7 +30,12 @@ T中所有状态入栈
 一个DFA状态可能对应多个nfa接收态,可以让在前的状态优先匹配.例如(1,2,3),若2,3都是接收态,则认为串属于2代表的表达式
 '''
 import lex.RE2NFA as re2nfa
-
+class lexerror(Exception):
+    #  词法分析时的错误处理
+    def __init__(self,i):
+        self.i = i
+    def __str__(self):
+        return '无法识别的单词拼写'
 
 class DFA():
     cnt = 0
@@ -134,15 +139,20 @@ class DFA():
 
     def match(self, word:str):
         # 让输入串在dfa上跑,失配时,返回上一个接收状态和失配位置
-        l, i= len(word), 0
+        l, i = len(word), 0
         curState = self.startstate
+        accept_stack = []  # 存遇到的终结状态
         while i<l:
             c = word[i]
             if c in self.trans[curState]:
                 curState = self.trans[curState][c]
+                if curState in self.endstates:
+                    accept_stack.append((i+1,self.endstates[curState]))
             else:
-                return i, self.endstates[curState]
-
+                if len(accept_stack)!=0:
+                    return accept_stack[-1]
+                else:
+                    raise lexerror(i+1)
             i += 1
         return i, self.endstates[curState]
 
@@ -185,7 +195,8 @@ def main():
     re2 = "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z"
     #dfa = getDFA('0(x|X)(0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*')
     #print(dfa.match('0x1233'))
-    d = getDFA_from_multi([('(0|1|2|3|4|5|6|7|8|9)*',1),('int',2)])
+    nfa = 0
+    d = getDFA_from_multi([('ab*(a|b)*',1)])
     #d.simplify()
     d.transit_table()
     print(d.endstates)
