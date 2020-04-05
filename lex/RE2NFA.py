@@ -61,7 +61,7 @@ class tree():
     '''
 
     def __init__(self, regex):
-        print(regex)
+        #print(regex)
         self.rawexp = regex
         self.regex = proprocess(regex)
         self.s1 = []
@@ -123,14 +123,7 @@ def proprocess(exp):
     #  要么是字母,符号   除了(都不用加+   a* a| a) a? a(
     #  要么是符号,字母   如果是单目运算符要加+了 (a  |a   *`a  ?`a
     #  要么是符号,符号   不加  *| *) |)  () |* )(
-    def kuohao(exp):
-        newexp = ""
-        for c in exp:
-            if c == '\\':
-                continue
-        exp = newexp
 
-    # kuohao(exp)
     newexp = ""
     lastchar = None
     l, i = len(exp), -1
