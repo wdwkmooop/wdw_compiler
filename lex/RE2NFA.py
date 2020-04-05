@@ -191,9 +191,10 @@ class nfa():
         self.endstate = endstate
 
     def transit_table(self):  # 输出转换表
-        print("开始状态:", self.startstate.state, "接收状态:", self.endstate.state)
+        print("开始状态:", self.startstate.state, "接收状态:", self.endstate)
         for node in nfa.pool:
             print("状态:", node.state, "空转移:", node.epsilon, "非空转移:", node.char)
+        print('')
 
 
 def constructNFA(tree: treenode):
@@ -234,11 +235,11 @@ def constructNFA(tree: treenode):
     return nfa(start, end)
 
 
-def getnfa(re: str):
+def getnfa(re: str, type=0):
     t = tree(re)
     _t = t.getTree()
     ret = constructNFA(_t)
-    # ret.endstate = [ret.endstate.state]
+    ret.endstate = {ret.endstate.state:type}
     return ret
 
 
@@ -257,7 +258,6 @@ def main():
     mynfa = getnfa(re)
     # my = constructNFA(t)
     mynfa.transit_table()
-    print(mynfa.endstate.state)
 
 
 if __name__ == "__main__":

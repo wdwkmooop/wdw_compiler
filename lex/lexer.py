@@ -41,7 +41,7 @@ identifier = '(_|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|' \
 integer = '(0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*'
 real = '(0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*.(0|1|2|3|4|5|6|7|8|9)*(e|E)?' \
        '(0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*'
-_hex = '0(x|X)(0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*'
+_hex = '0(x|X)(0|1|2|3|4|5|6|7|8|9|a|b|c|d|e|f)(0|1|2|3|4|5|6|7|8|9|a|b|c|d|e|f)*'
 
 regexs = []
 regexs += [(x, 0) for x in key_word]
@@ -100,7 +100,7 @@ class lexer():
             elif line[i] == '"':
                 s = ''
                 i += 1
-                while line[i] != '"':  # 我突然感觉处理转义字符可以写个公共方法了,艹
+                while i < l and line[i] != '"':                                 # 我突然感觉处理转义字符可以写个公共方法了,艹
                     if line[i] == '\\':
                         s += line[i]
                         s += line[i+1]
@@ -108,6 +108,9 @@ class lexer():
                         continue
                     s += line[i]
                     i += 1
+                if i == l:
+                    print('line %d, column %d: ' %(self.row,i),'未匹配的双引号')
+                    return
                 i += 1
                 print('<字符串常量,%s>' % s)
                 continue
@@ -131,3 +134,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

@@ -141,16 +141,16 @@ class DFA():
         # 让输入串在dfa上跑,失配时,返回上一个接收状态和失配位置
         l, i = len(word), 0
         curState = self.startstate
-        accept_stack = []  # 存遇到的终结状态
+        accept_stack = None  # 存遇到的终结状态
         while i<l:
             c = word[i]
             if c in self.trans[curState]:
                 curState = self.trans[curState][c]
                 if curState in self.endstates:
-                    accept_stack.append((i+1,self.endstates[curState]))
+                    accept_stack = (i+1,self.endstates[curState])
             else:
-                if len(accept_stack)!=0:
-                    return accept_stack[-1]
+                if accept_stack is not None:
+                    return accept_stack
                 else:
                     raise lexerror(i+1)
             i += 1
@@ -179,9 +179,9 @@ def getDFA_from_multi(lis: list):
     ret = re2nfa.nfa(re2nfa.nfaNode(),None)
     ret.endstate = {}
     for item in lis:
-        t = re2nfa.getnfa(item[0])
+        t = re2nfa.getnfa(item[0],item[1])
         temp_nfa.append(t)
-        ret.endstate[t.endstate.state] = item[1]
+        ret.endstate.update( t.endstate )
     for nfa in temp_nfa:
         ret.startstate.epsilon.add(nfa.startstate.state)
     d = DFA(ret)
@@ -195,11 +195,12 @@ def main():
     re2 = "A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z"
     #dfa = getDFA('0(x|X)(0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*')
     #print(dfa.match('0x1233'))
-    nfa = 0
-    d = getDFA_from_multi([('ab*(a|b)*',1)])
-    #d.simplify()
+    nfa = re2nfa.getnfa('ab*(a|b)*',1)
+    nfa.transit_table()
+    d = DFA(nfa)
+    d.construct_DFA()
+    d.simplify()
     d.transit_table()
-    print(d.endstates)
 if __name__ == '__main__':
     main()
 

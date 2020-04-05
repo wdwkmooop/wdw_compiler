@@ -24,7 +24,7 @@ letter = CharClass('asdfghjklzxcvbnmqwertyuiop')
 Letter = CharClass('ZXCVBNMASDFGHJKLQWERTYUIOP')
 anychar = anychar()
 
-
+'''
 def get_substrs_by_or(text):
     depth = 0
     left = 0
@@ -156,3 +156,4 @@ if __name__ == '__main__':
     a = Thompson_AutoMata()
     a.build(test_str)
     a.print_graph()
+'''
